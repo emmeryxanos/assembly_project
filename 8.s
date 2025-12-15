@@ -5,7 +5,7 @@
         IMPORT ERROR_FLAGS      ; Array of error flags
 
 Calc_FinalBill
-        PUSH {R4-R9, LR}        ; Save registers
+        PUSH {R4-R11, LR}        ; Save registers
         MOV R0, #0              ; patient index
         MOV R9, #3              ; Hardcoded: 3 patients
 
@@ -68,6 +68,6 @@ SetError
         B FinalLoop
 
 FinalDone
-        POP {R4-R9, LR}
+        POP {R4-R11, LR}
         BX LR
         END
