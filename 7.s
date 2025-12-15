@@ -6,7 +6,7 @@
         IMPORT MedListPointers    ; Array of pointers: [ML1, ML2, ML3]
 
 Calc_MedBill
-        PUSH {R4-R8, LR}
+        PUSH {R4-R11, LR}
         MOV R0, #0                ; patient index
         MOV R8, #3                ; patient count
 
@@ -55,6 +55,6 @@ StoreResult
         B MedLoop
 
 MedDone
-        POP {R4-R8, LR}
+        POP {R4-R11, LR}
         BX LR
         END
