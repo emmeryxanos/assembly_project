@@ -1,8 +1,9 @@
-		AREA Module10_Code, CODE, READONLY
+        AREA Module10_Code, CODE, READONLY
 		EXPORT Module10_Run
 		IMPORT PATIENT_ARRAY
 		IMPORT ALERT_COUNT_ARRAY
 		IMPORT VITAL_INDEX
+		IMPORT BILLING_ARRAY
 	    EXPORT init_itm
 		EXPORT print_string
 		EXPORT print_number
@@ -49,11 +50,13 @@ patient_loop
     MUL R8, R0, R1             ; R8 = index * 44
     ADD R8, R6, R8             ; R8 = current patient address
 
-    ; Print this patient
+    ; Print this patient - SAVE LOOP REGISTERS!
+    PUSH {R4-R8}                ; Save all loop variables
     MOV R0, R8                  ; Patient struct address
-    MOV R1, R4                  ; Patient index (for alerts)
+    MOV R1, R4                  ; Patient index
     MOV R2, R7                  ; Alert array address
     BL print_patient_details
+    POP {R4-R8}                 ; Restore loop variables
 
     ; Add separator between patients
     CMP R4, #2                  ; Don't add after last patient
@@ -204,16 +207,31 @@ o2_done
     ; ----- Alerts -----
     LDR R0, =alert_str
     BL print_string
+    
+    ; Save R5, R6 before calling print_number
+    PUSH {R5, R6}
     ; Get alert count: alert_array[patient_index]
     LDR R0, [R6, R5, LSL #2]  ; R0 = alert_array[index * 4]
     BL print_number
+    POP {R5, R6}               ; Restore R5, R6
+    
     BL print_newline
 
     ; ----- Bill -----
     LDR R0, =bill_str
     BL print_string
-    LDR R0, [R4, #16]   ; bill at offset 16
-    BL print_bill       ; Special function to print as dollars.cents
+    
+    ; Get total bill from BILLING_ARRAY
+    ; Save R5 before calculation
+    PUSH {R5}
+    LDR R0, =BILLING_ARRAY      ; Base of billing array
+    MOV R1, #16                 ; Billing struct size = 16 bytes
+    MUL R2, R5, R1              ; offset = patient_index * 16
+    ADD R0, R0, R2              ; R0 = &billing[patient_index]
+    LDR R0, [R0, #12]           ; Load total bill from offset 12
+    POP {R5}                    ; Restore R5
+    
+    BL print_bill
 
     POP {R4-R8, PC}
 
@@ -306,7 +324,7 @@ div10_done
     BX LR
 
 ; =================================================
-; Print Number (0-999) - CORRECTED VERSION
+; Print Number (0-999)
 ; Input: R0 = number
 ; =================================================
 print_number
