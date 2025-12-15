@@ -5,7 +5,7 @@
         IMPORT STAY_DAYS
 
 Calc_RoomRent
-        PUSH {R4-R10, LR}
+        PUSH {R4-R11, LR}
         MOV R0, #0                ; patient index
         MOV R10, #3               ; Hardcoded: 3 patients
 
@@ -56,6 +56,6 @@ NoDiscount
         B RoomLoop
 
 RoomDone
-        POP {R4-R10, LR}
+        POP {R4-R11, LR}
         BX LR
         END
